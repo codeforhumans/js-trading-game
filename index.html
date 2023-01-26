@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanilla Javascript Trading Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+    <!-- create web component for the wallet -->
+    <header>
+        <strong id="wallet">10 BTC</strong>
+    </header>
+
+    <canvas id="game"></canvas>
+
+    <!-- create web components for the controls -->
+    <form action="">
+        <button id="btn-buy" class="btn buy" type="button">Buy</button>
+        <button id="btn-sell" class="btn sell" type="button">Sell</button>
+    </form>
+
+    <script src="scripts/mock-data.js" defer></script>
+    <script src="scripts/candle-stick.js" defer></script>
+    <script src="scripts/game.js" defer></script>
+    <script src="scripts/main.js" defer></script>
+</body>
+</html>
