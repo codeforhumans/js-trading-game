@@ -47,11 +47,11 @@ class Game {
         this.context.fillStyle = '#335';
 
         for (let i = 0; i < Math.ceil(this.element.height / 40); i++) {
-            this.context.fillRect(0, Math.max(i, 1) * 40, this.element.width, 1);
+            this.context.fillRect(0, Math.max(i, 1) * 40, this.element.width - 64, 1);
         }
 
         for (let i = 0; i < Math.ceil(this.element.width / 40); i++) {
-            this.context.fillRect(Math.max(i, 1) * 40, 0, 1, this.element.height);
+            this.context.fillRect(Math.max(i, 1) * 38, 0, 1, this.element.height);
         }
 
         const maxCandles = this.element.width / (CandleStick.width() + 10);
@@ -94,6 +94,7 @@ class Game {
             }
         });
         
+        this.drawPrices(center);
     }
 
     drawCursor(event) {
@@ -112,5 +113,23 @@ class Game {
         this.context.moveTo(event.offsetX, 0);
         this.context.lineTo(event.offsetX, this.element.height);
         this.context.stroke();
+    }
+
+    // fix positioning
+    drawPrices() {
+        const prices = this.data.slice(0, -1).map(data => data.close);
+        const higherPrice = Math.ceil(Math.max(...prices));
+        const maxPrices = Math.ceil(higherPrice + (higherPrice / 2));
+        const priceX = this.element.width - 40;
+
+        this.context.beginPath();
+        this.context.font = '14px Helvetica';
+        console.log(higherPrice);
+        for (let i = 0; i < maxPrices; i++) {
+            let price = higherPrice - i;
+            let priceY = higherPrice - (i * 10);
+            this.context.fillStyle = '#aaa';
+            this.context.fillText(price, priceX, i * 30);
+        }
     }
 }

@@ -15,4 +15,4 @@ window.addEventListener('resize', () => game.resize());
 // loads updated mock data
 setInterval(() => {
     game.updateData(mockData);
-}, 100)
+}, 1000)

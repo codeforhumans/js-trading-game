@@ -14,14 +14,26 @@ body {
 }
 
 header {
+    align-items: center;
     border-bottom: 4px solid #335;
+    display: flex;
+    justify-content: space-between;
     text-align: right;
+}
+header h1 {
+    font-size: 1.4em;
+    color: #dde;
+    padding: .5em;
 }
 header strong {
     background-color: #339;
     color: #fff;
-    display: inline-block;
+    display: flex;
+    justify-content: ;
     padding: 1em 1.5em;
+}
+header strong svg {
+    width: 20px;
 }
 
 form {
