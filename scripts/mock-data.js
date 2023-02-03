@@ -13,8 +13,8 @@ setInterval(() => {
     const lastIndex = mockData.length - 1;
     const open = mockData[lastIndex].close;
     const close = Math.random() * 100;
-    const high = close + Math.random() * 5;
-    const low = open + Math.random() * -5;
+    const high = Math.max(open, close) + Math.random() * 5;
+    const low = Math.min(open, close) + Math.random() * -5;
 
     if (interval >= 5) {
         mockData.push({open, close, high, low});
@@ -23,14 +23,8 @@ setInterval(() => {
     }
 
     mockData[lastIndex].close = close;
-
-    if (mockData[lastIndex].high < high) {
-        mockData[lastIndex].high = high;
-    }
-
-    if (mockData[lastIndex].low > low) {
-        mockData[lastIndex].low = low;
-    }
+    mockData[lastIndex].high = Math.max(mockData[lastIndex].high, high, open, close);
+    mockData[lastIndex].low = Math.min(mockData[lastIndex].low, low, open, close);
 
     ++interval;
     
