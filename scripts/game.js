@@ -20,7 +20,7 @@ class Game {
                 return;
             }
 
-            const wallet = parseFloat(this.walletEl.innerText.substring(1,));
+            const wallet = parseFloat(this.walletEl.innerText.replace(/\D/g, ''));
             const order = {
                 quantity: wallet / this.data[this.data.length - 1].close,
                 open: true
@@ -34,21 +34,7 @@ class Game {
             this.orders.push(order);
         });
 
-        this.sellEl.addEventListener('click', event => {
-            if (event.target.disabled) {
-                return;
-            }
-
-            const profit = this.data[this.data.length - 1].close * this.orders[this.orders.length - 1].quantity;
-
-            event.target.disabled = true;
-            this.buyEl.removeAttribute('disabled');
-
-            this.walletEl.innerText = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(profit);
-            this.currentOrderEl.innerText = '0';
-
-            this.orders[this.orders.length - 1].open = false;
-        });
+        this.sellEl.addEventListener('click', event => this.sell(event));
 
         this.element.addEventListener('mousemove', e => {
             this.drawCursor(e);
@@ -86,6 +72,8 @@ class Game {
         const horizontalLines = 20;
 
         this.context.lineWidth = 1;
+        this.context.font = '14px sans-serif';
+        this.context.textAlign = 'center';
 
         for (let i = 1; i <= horizontalLines; i++) {
             const posY = (this.element.height / horizontalLines) * i;
@@ -96,7 +84,7 @@ class Game {
             this.context.moveTo(0, posY);
             this.context.lineTo(this.element.width - 80, posY);
             this.context.stroke();
-            this.context.fillStyle = '#fff';
+            this.context.fillStyle = '#aab';
             this.context.fillText(Math.floor(center - posY), this.element.width - 40, posY);
         }
 
@@ -121,7 +109,7 @@ class Game {
                 json.low
             );
 
-            this.context.fillStyle = candle.isBear() ? '#508850' : '#bd4343';
+            this.context.fillStyle = candle.isBear() ? '#bd4343' : '#508850';
             this.context.strokeStyle = this.context.fillStyle;
 
             this.context.fillRect(
@@ -148,7 +136,6 @@ class Game {
                 this.context.lineTo(this.element.width, center - candle.close);
                 this.context.stroke();
                 this.context.fillRect(this.element.width - 80, center - candle.close - 12, 80, 24);
-                this.context.textAlign = 'center';
                 this.context.fillStyle = '#fff';
                 this.context.fillText(
                     Math.ceil(candle.close),
@@ -156,7 +143,7 @@ class Game {
                     center - candle.close + 4
                 );
                 this.context.shadowBlur = 0;
-                this.context.shadowColor = '#fff';
+                this.context.shadowColor = '#aab';
                 this.context.lineWidth = 1;
             }
         });
@@ -168,7 +155,7 @@ class Game {
         
         this.draw();
 
-        this.context.strokeStyle = '#fff';
+        this.context.strokeStyle = '#aab';
         this.context.lineWidth = .8;
         this.context.setLineDash([4, 4]);
 
@@ -188,9 +175,29 @@ class Game {
         this.context.fillStyle = '#fff'; 
         this.context.fillText(centerY - event.offsetY, textX, event.offsetY + 5);
 
-        this.context.fillStyle = '#fff';
-        this.context.strokeStyle = '#fff';
+        this.context.fillStyle = '#aab';
+        this.context.strokeStyle = '#aab';
         this.context.lineWidth = 1;
         this.context.setLineDash([1]);
+    }
+
+    sell(event) {
+        if (event.target.disabled) {
+            return;
+        }
+
+        event.target.disabled = true;
+        this.buyEl.removeAttribute('disabled');
+
+        const lastDataClose = this.data[this.data.length - 1].close;
+        const lastOrderQuantity = this.orders[this.orders.length - 1].quantity;
+        const profit = lastDataClose * lastOrderQuantity;
+
+        const usdFormatter = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
+
+        this.walletEl.innerText = usdFormatter.format(profit);
+        this.currentOrderEl.innerText = 0;
+
+        this.orders[this.orders.length - 1].open = false;
     }
 }
