@@ -14,26 +14,9 @@ class Game {
         this.data = data;
         this.orders = [];
         this.lastMouseOffset = {};
+        this.onCloseOrderCallback = () => false;
 
-        this.buyEl.addEventListener('click', event => {
-            if (event.target.disabled) {
-                return;
-            }
-
-            const wallet = parseFloat(this.walletEl.innerText.replace(/\D/g, ''));
-            const order = {
-                quantity: wallet / this.data[this.data.length - 1].close,
-                open: true
-            };
-
-            event.target.disabled = true;
-            this.sellEl.removeAttribute('disabled');
-            this.currentOrderEl.innerText = new Intl.NumberFormat('en-US').format(order.quantity);
-            this.walletEl.innerText = '$0';
-
-            this.orders.push(order);
-        });
-
+        this.buyEl.addEventListener('click', event => this.buy(event));
         this.sellEl.addEventListener('click', event => this.sell(event));
 
         this.element.addEventListener('mousemove', e => {
@@ -48,9 +31,10 @@ class Game {
         const docSize = document.body.getBoundingClientRect();
         const headerSize = document.querySelector('header').getBoundingClientRect();
         const footerSize = this.buyEl.parentNode.getBoundingClientRect();
+        const ordersSize = document.getElementById('orders').getBoundingClientRect();
 
         this.element.width = docSize.width;
-        this.element.height = window.innerHeight - headerSize.height - footerSize.height;
+        this.element.height = window.innerHeight - headerSize.height - footerSize.height - ordersSize.height;
 
         this.draw();
     }
@@ -181,6 +165,28 @@ class Game {
         this.context.setLineDash([1]);
     }
 
+    buy(event) {
+        if (event.target.disabled) {
+            return;
+        }
+
+        const wallet = parseFloat(this.walletEl.dataset.amount);
+        const price = this.data[this.data.length - 1].close;
+
+        const order = {
+            quantity: wallet / Math.abs(price),
+            buyPrice: Math.abs(price),
+            open: true
+        };
+
+        event.target.disabled = true;
+        this.sellEl.removeAttribute('disabled');
+        this.currentOrderEl.innerText = new Intl.NumberFormat('en-US').format(order.quantity);
+        this.walletEl.innerText = '$0';
+
+        this.orders.push(order);
+    }
+
     sell(event) {
         if (event.target.disabled) {
             return;
@@ -192,12 +198,30 @@ class Game {
         const lastDataClose = this.data[this.data.length - 1].close;
         const lastOrderQuantity = this.orders[this.orders.length - 1].quantity;
         const profit = lastDataClose * lastOrderQuantity;
-
         const usdFormatter = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
 
         this.walletEl.innerText = usdFormatter.format(profit);
+        this.walletEl.dataset.amount = profit;
         this.currentOrderEl.innerText = 0;
 
+        this.orders[this.orders.length - 1].sellPrice = lastDataClose;
         this.orders[this.orders.length - 1].open = false;
+
+        this.onCloseOrderCallback([...this.orders]
+            .filter(order => !order.open)
+            .map(order => {
+                const clone = {...order};
+                clone.quantity = new Intl.NumberFormat('en-US').format(clone.quantity);
+                clone.buyPrice = usdFormatter.format(order.buyPrice);
+                clone.sellPrice = usdFormatter.format(order.sellPrice);
+                clone.profit = usdFormatter.format(order.sellPrice - order.buyPrice);
+                return clone;
+            }));
+    }
+
+    onCloseOrder(fn) {
+        if (typeof fn === 'function') {
+            this.onCloseOrderCallback = fn;
+        }
     }
 }

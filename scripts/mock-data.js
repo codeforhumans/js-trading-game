@@ -3,10 +3,10 @@
 let interval = 0;
 
 const mockData = [
-    {open: 0, close: 20, high: 25, low: -5},
+    {open: 0, close: 20, high: 25, low: 5},
     {open: 20, close: 30, high: 40, low: 10},
-    {open: 30, close: 0, high: 50, low: -20},
-    {open: 0, close: -20, high: 50, low: -50},
+    {open: 30, close: 0, high: 50, low: 20},
+    {open: 0, close: 10, high: 50, low: 50},
 ];
 
 setInterval(() => {
