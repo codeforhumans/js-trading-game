@@ -1,3 +1,3 @@
 # Vanilla Javascript Trading Game
 
-![](images/preview.gif)
+![Candlesticks Screenshot](images/preview.png)
