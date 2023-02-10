@@ -15,6 +15,9 @@ class Order {
 
 class OrderBook extends HTMLElement {
 
+    #orders
+    #body
+
     constructor() {
         super();
 
@@ -60,25 +63,25 @@ class OrderBook extends HTMLElement {
             </slot>
         `;
 
-        this.orders = [];
-        this.body = shadow.querySelector('tbody');
+        this.#orders = [];
+        this.#body = shadow.querySelector('tbody');
     }
 
     append(order) {
-        this.orders.push(order);
+        this.#orders.push(order);
         this.update();
     }
 
     update() {
         const usdFormatter = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
 
-        this.body.innerHTML = '';
-        this.orders.forEach(order => {
+        this.#body.innerHTML = '';
+        this.#orders.forEach(order => {
             const buyPrice = usdFormatter.format(order.buyPrice);
             const sellPrice = usdFormatter.format(order.sellPrice);
             const profit = usdFormatter.format(order.sellPrice - order.buyPrice);
 
-            this.body.innerHTML += `
+            this.#body.innerHTML += `
                 <tr>
                     <td>${order.quantity}</td>
                     <td>${buyPrice}</td>

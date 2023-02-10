@@ -2,6 +2,13 @@
 
 class OrderTransaction extends HTMLElement {
 
+    #wallet
+    #price
+    #openTransaction
+    #buyElement
+    #sellElement
+    #balanceElement
+
     constructor() {
         super();
 
@@ -85,32 +92,79 @@ class OrderTransaction extends HTMLElement {
             <slot>
                 <button class="btn buy" type="button">Buy</button>
                 <span>$1000</span>
-                <button class="btn sell" type="button">Sell</button>
+                <button class="btn sell" disabled type="button">Sell</button>
             </slot>
         `;
 
-        this.buyElement = shadow.querySelector('button.buy');
-        this.sellElement = shadow.querySelector('button.sell');
-        this.balanceElement = shadow.querySelector('span');
+        this.#wallet = 1000;
+        this.#price = 0;
+        this.#openTransaction = null;
 
-        this.buyElement.addEventListener('click', this.buy);
-        this.sellElement.addEventListener('click', this.sell);
+        this.#buyElement = shadow.querySelector('button.buy');
+        this.#sellElement = shadow.querySelector('button.sell');
+        this.#balanceElement = shadow.querySelector('span');
+
+        this.buy = this.buy.bind(this);
+        this.sell = this.sell.bind(this);
+
+        this.#buyElement.addEventListener('click', this.buy);
+        this.#sellElement.addEventListener('click', this.sell);
     }
 
-    buy() {
+    buy(event) {
+        if (this.#openTransaction
+            || this.#price <= 0
+            || this.#wallet < this.#price
+        ) {
+            return;
+        }
+
+        this.#openTransaction = {
+            buyPrice: this.#price,
+            quantity: this.#wallet / this.#price,
+        };
+
+        this.updateBalance(0);
+        
+        event.target.disabled = true;
+        this.#sellElement.removeAttribute('disabled');
+        
     }
 
-    sell() {
+    sell(event) {
+        if (!this.#openTransaction) {
+            return;
+        }
+
+        this.#openTransaction = {...this.#openTransaction, sellPrice: this.#price};
+
         this.dispatchEvent(new CustomEvent('orderSold', {
             composed: true,
             bubbles: true,
-            detail: {buyPrice: 0, sellPrice: 0, quantity: 0},
+            detail: this.#openTransaction,
         }));
+
+        this.updateBalance(this.#openTransaction.sellPrice * this.#openTransaction.quantity);
+
+        this.#openTransaction = null;
+
+        event.target.disabled = true;
+        this.#buyElement.removeAttribute('disabled');
     }
 
-    updateBalance(newBalance) {
+    updateBalance() {
         const usdFormatter = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
-        this.balanceElement.innerText = usdFormatter.format(newBalance);
+        this.#balanceElement.innerText = usdFormatter.format(this.#wallet);
+    }
+
+    updateStockPrice(price) {
+        this.#price = price;
+    }
+
+    updateBalance(balance) {
+        this.#wallet = balance;
+        const usdFormatter = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
+        this.#balanceElement.innerText = usdFormatter.format(balance);
     }
 }
 

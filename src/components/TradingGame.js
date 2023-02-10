@@ -34,6 +34,10 @@ setInterval(() => {
 
 class TradingGame extends HTMLElement {
 
+    #chart
+    #transaction
+    #book
+
     constructor() {
         super();
 
@@ -49,18 +53,26 @@ class TradingGame extends HTMLElement {
             </slot>
         `;
 
-        this.chart = shadow.querySelector('candlesticks-chart');
-        this.transaction = shadow.querySelector('order-transaction');
-        this.book = shadow.querySelector('order-book');
+        this.#chart = shadow.querySelector('candlesticks-chart');
+        this.#transaction = shadow.querySelector('order-transaction');
+        this.#book = shadow.querySelector('order-book');
 
+        this.updateData = this.updateData.bind(this);
         this.updateBook = this.updateBook.bind(this);
 
-        this.transaction.addEventListener('orderSold', this.updateBook);
+        this.#transaction.addEventListener('orderSold', this.updateBook);
+        setInterval(this.updateData, 1000);
+
+        this.updateData();
+    }
+
+    updateData() {
+        this.#chart.updateData(mockData);
+        this.#transaction.updateStockPrice(mockData[mockData.length - 1].close);
     }
 
     updateBook(event) {
-        this.book.append(event.detail);
-        console.log(this.book.orders);
+        this.#book.append(event.detail);
     }
 }
 
