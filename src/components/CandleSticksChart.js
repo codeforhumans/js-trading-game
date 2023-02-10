@@ -145,12 +145,15 @@ class CandleSticksChart extends HTMLElement {
             );
 
             this.#context.globalAlpha = .4;
-            
+
+            // can this 1000 be dynamic?
+            const volumeHeight = candle.volume / 1000 / 150;
+
             this.#context.fillRect(
                 index * (CandleStick.width() + 10),
-                this.#canvas.height - candle.volume,
+                this.#canvas.height - volumeHeight,
                 CandleStick.width(),
-                candle.volume
+                volumeHeight
             );
 
             this.#context.globalAlpha = 1;

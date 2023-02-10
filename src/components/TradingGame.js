@@ -1,6 +1,6 @@
 'use strict'
 
-import mockData from '../modules/MockData.js';
+import ApiClient from '../modules/ApiClient.js';
 
 class TradingGame extends HTMLElement {
 
@@ -39,8 +39,11 @@ class TradingGame extends HTMLElement {
     }
 
     updateData() {
-        this.#chart.updateData(mockData);
-        this.#transaction.updateStockPrice(mockData[mockData.length - 1].close);
+        new ApiClient().getData()
+            .then(data => {
+                this.#chart.updateData(data);
+                this.#transaction.updateStockPrice(data[data.length - 1].close);
+            });
     }
 
     updateBook(event) {
