@@ -103,10 +103,10 @@ class CandleSticksChart extends HTMLElement {
         }
 
          // 80 for the price label
-        const maxCandles = this.#canvas.width / (CandleStick.width() + 10 + 80);
+        const maxCandles = Math.floor(this.#canvas.width / (CandleStick.width() + 10 + 80));
 
         const data = this.#data.length > maxCandles
-            ? this.#data.slice(-Math.abs(maxCandles))
+            ? [...this.#data].slice(-Math.abs(maxCandles))
             : this.#data;
 
         data.forEach((json, index) => {
@@ -134,7 +134,7 @@ class CandleSticksChart extends HTMLElement {
                 candle.highLowHeight()
             );
 
-            if (this.#data.length === (index + 1)) {
+            if (data.length === (index + 1)) {
                 this.#context.beginPath();
                 this.#context.shadowBlur = 10;
                 this.#context.shadowColor = this.#context.fillStyle;
