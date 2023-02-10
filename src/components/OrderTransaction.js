@@ -168,4 +168,4 @@ class OrderTransaction extends HTMLElement {
     }
 }
 
-customElements.define('order-transaction', OrderTransaction);
+export default OrderTransaction;

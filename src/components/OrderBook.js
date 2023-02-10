@@ -1,18 +1,5 @@
 'use strict'
 
-class Order {
-
-    constructor(type, initPos, endPos) {
-        this.type = type;
-        this.init = initPos;
-        this.end = endPos;
-    }
-
-    isOpen() {
-        return !! this.end;
-    }
-}
-
 class OrderBook extends HTMLElement {
 
     #orders
@@ -93,4 +80,4 @@ class OrderBook extends HTMLElement {
     }
 }
 
-customElements.define('order-book', OrderBook);
+export default OrderBook;
