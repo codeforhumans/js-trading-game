@@ -6,12 +6,14 @@ class CandleStick {
     #close
     #high
     #low
+    #volume
 
-    constructor(open, close, high, low) {
+    constructor(open, close, high, low, volume) {
         this.#open = open;
         this.#close = close;
         this.#high = high;
         this.#low = low;
+        this.#volume = volume;
     }
 
     static width() {
@@ -32,6 +34,10 @@ class CandleStick {
 
     get low() {
         return this.#low;
+    }
+
+    get volume() {
+        return this.#volume;
     }
 
     isBear() {

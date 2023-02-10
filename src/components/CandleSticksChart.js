@@ -7,6 +7,8 @@ class CandleSticksChart extends HTMLElement {
     #data
     #canvas
     #context
+    #priceLabelWidth
+    #lastMousePosition
 
     constructor() {
 
@@ -36,17 +38,26 @@ class CandleSticksChart extends HTMLElement {
         this.#canvas.height = shadow.host.getBoundingClientRect().height;
         this.#canvas.width = shadow.host.getBoundingClientRect().width;
 
-        this.#canvas.addEventListener('mousemove', event => this.drawCursor(event));
+        this.#priceLabelWidth = 80;
+
+        this.#lastMousePosition = {offsetX: 0, offsetY: 0};
+
+        this.drawCursor = this.drawCursor.bind(this);
+
+        this.#canvas.addEventListener('mousemove', e => this.draw() || this.drawCursor(e));
 
         this.draw();
     }
 
     drawCursor(event) {
+
+        if (event) {
+            this.#lastMousePosition = {offsetX: event.offsetX, offsetY: event.offsetY};
+        }
+        
         const centerY = this.#canvas.height / 2;
         const textX = this.#canvas.width - 40;
         
-        this.draw();
-
         this.#context.strokeStyle = '#aab';
         this.#context.lineWidth = .8;
         this.#context.setLineDash([4, 4]);
@@ -63,7 +74,7 @@ class CandleSticksChart extends HTMLElement {
 
         this.#context.beginPath();
         this.#context.fillStyle = '#1f1f27';
-        this.#context.fillRect(textX - 40, event.offsetY - 12, 80, 24);
+        this.#context.fillRect(textX - 40, event.offsetY - 12, this.#priceLabelWidth, 24);
         this.#context.fillStyle = '#fff'; 
         this.#context.fillText(centerY - event.offsetY, textX, event.offsetY + 5);
 
@@ -77,6 +88,7 @@ class CandleSticksChart extends HTMLElement {
         this.#context.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
 
         const center = Math.floor(this.#canvas.height / 2);
+        const maxCandles = Math.floor(this.#canvas.width / (CandleStick.width() + 10) + this.#priceLabelWidth);
         const horizontalLines = 20;
 
         this.#context.lineWidth = 1;
@@ -90,7 +102,7 @@ class CandleSticksChart extends HTMLElement {
             this.#context.strokeStyle = '#1f1f27';
             this.#context.setLineDash([]);
             this.#context.moveTo(0, posY);
-            this.#context.lineTo(this.#canvas.width - 80, posY);
+            this.#context.lineTo(this.#canvas.width - this.#priceLabelWidth, posY);
             this.#context.stroke();
             this.#context.fillStyle = '#aab';
             this.#context.fillText(Math.floor(center - posY), this.#canvas.width - 40, posY);
@@ -102,9 +114,6 @@ class CandleSticksChart extends HTMLElement {
             this.#context.fillRect(Math.max(i, 1) * 38, 0, 1, this.#canvas.height);
         }
 
-         // 80 for the price label
-        const maxCandles = Math.floor(this.#canvas.width / (CandleStick.width() + 10 + 80));
-
         const data = this.#data.length > maxCandles
             ? [...this.#data].slice(-Math.abs(maxCandles))
             : this.#data;
@@ -114,7 +123,8 @@ class CandleSticksChart extends HTMLElement {
                 json.open,
                 json.close,
                 json.high,
-                json.low
+                json.low,
+                json.volume
             );
 
             this.#context.fillStyle = candle.isBear() ? '#bd4343' : '#508850';
@@ -134,6 +144,17 @@ class CandleSticksChart extends HTMLElement {
                 candle.highLowHeight()
             );
 
+            this.#context.globalAlpha = .4;
+            
+            this.#context.fillRect(
+                index * (CandleStick.width() + 10),
+                this.#canvas.height - candle.volume,
+                CandleStick.width(),
+                candle.volume
+            );
+
+            this.#context.globalAlpha = 1;
+
             if (data.length === (index + 1)) {
                 this.#context.beginPath();
                 this.#context.shadowBlur = 10;
@@ -143,7 +164,7 @@ class CandleSticksChart extends HTMLElement {
                 this.#context.moveTo(0, center - candle.close);
                 this.#context.lineTo(this.#canvas.width, center - candle.close);
                 this.#context.stroke();
-                this.#context.fillRect(this.#canvas.width - 80, center - candle.close - 12, 80, 24);
+                this.#context.fillRect(this.#canvas.width - this.#priceLabelWidth, center - candle.close - 12, this.#priceLabelWidth, 24);
                 this.#context.fillStyle = '#fff';
                 this.#context.fillText(
                     Math.ceil(candle.close),
@@ -155,6 +176,8 @@ class CandleSticksChart extends HTMLElement {
                 this.#context.lineWidth = 1;
             }
         });
+
+        this.drawCursor(this.#lastMousePosition);
     }
 
     updateData(data) {

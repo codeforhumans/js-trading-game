@@ -3,10 +3,10 @@
 let interval = 0;
 
 const mockData = [
-    {open: 0, close: 20, high: 25, low: 5},
-    {open: 20, close: 30, high: 40, low: 10},
-    {open: 30, close: 0, high: 50, low: 20},
-    {open: 0, close: 10, high: 50, low: 50},
+    {open: 0, close: 20, high: 25, low: 5, volume: 100},
+    {open: 20, close: 30, high: 40, low: 10, volume: 50},
+    {open: 30, close: 0, high: 50, low: 20, volume: 30},
+    {open: 0, close: 10, high: 50, low: 50, volume: 20},
 ];
 
 setInterval(() => {
@@ -15,9 +15,10 @@ setInterval(() => {
     const close = Math.random() * 100;
     const high = Math.max(open, close) + Math.random() * 5;
     const low = Math.min(open, close) + Math.random() * -5;
-
+    const volume = Math.ceil(Math.random() * 150); 
+    // use date instead
     if (interval >= 5) {
-        mockData.push({open, close, high, low});
+        mockData.push({open, close, high, low, volume});
         interval = 0;
         return;
     }
@@ -25,6 +26,7 @@ setInterval(() => {
     mockData[lastIndex].close = close;
     mockData[lastIndex].high = Math.max(mockData[lastIndex].high, high, open, close);
     mockData[lastIndex].low = Math.min(mockData[lastIndex].low, low, open, close);
+    mockData[lastIndex].volume = Math.max(mockData[lastIndex].volume, Math.random() * 150);
 
     ++interval;
 

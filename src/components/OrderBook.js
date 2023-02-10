@@ -65,14 +65,16 @@ class OrderBook extends HTMLElement {
         this.#body.innerHTML = '';
         this.#orders.forEach(order => {
             const buyPrice = usdFormatter.format(order.buyPrice);
+            const buyPriceTotal = usdFormatter.format(order.buyPrice * order.quantity);
             const sellPrice = usdFormatter.format(order.sellPrice);
+            const sellPriceTotal = usdFormatter.format(order.sellPrice * order.quantity);
             const profit = usdFormatter.format(order.sellPrice - order.buyPrice);
 
             this.#body.innerHTML += `
                 <tr>
                     <td>${order.quantity}</td>
-                    <td>${buyPrice}</td>
-                    <td>${sellPrice}</td>
+                    <td>${buyPrice} <small>(${buyPriceTotal})</small></td>
+                    <td>${sellPrice} <small>(${sellPriceTotal})</small></td>
                     <td>${profit}</td>
                 </tr>
             `;
