@@ -118,6 +118,8 @@ class CandleSticksChart extends HTMLElement {
             ? [...this.#data].slice(-Math.abs(maxCandles))
             : this.#data;
 
+        const highestVolume = Math.max(...data.flatMap(c => c.volume));
+
         data.forEach((json, index) => {
             const candle = new CandleStick(
                 json.open,
@@ -146,7 +148,7 @@ class CandleSticksChart extends HTMLElement {
 
             this.#context.globalAlpha = .4;
 
-            const volumeHeight = ((this.#canvas.height / 3) * 857419) / candle.volume;
+            const volumeHeight = ((this.#canvas.height / 3) * candle.volume) / highestVolume;
 
             this.#context.fillRect(
                 index * (CandleStick.width() + 10),
