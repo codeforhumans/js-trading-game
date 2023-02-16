@@ -4,12 +4,15 @@ import CandleStick from '../modules/CandleStick.js';
 
 class CandleSticksChart extends HTMLElement {
 
-    #data
-    #canvas
-    #context
-    #priceLabelWidth
-    #lastMousePosition
-    #horizontalLines
+    #data;
+    #canvas;
+    #context;
+    #priceLabelWidth;
+    #lastMousePosition;
+    #horizontalLines;
+    #highestPrice;
+    #lowestPrice;
+    #priceFraction;
 
     constructor() {
 
@@ -41,11 +44,15 @@ class CandleSticksChart extends HTMLElement {
 
         this.#priceLabelWidth = 80;
         this.#lastMousePosition = {offsetX: 0, offsetY: 0};
-        this.#horizontalLines = 20;
+        this.#horizontalLines = 15;
+        this.#highestPrice = 0;
+        this.#lowestPrice = 0;
+        this.#priceFraction = 0;
 
         this.drawCursor = this.drawCursor.bind(this);
 
         this.#canvas.addEventListener('mousemove', e => this.draw() || this.drawCursor(e));
+        this.#canvas.addEventListener('mouseout', e => this.draw());
 
         this.draw();
     }
@@ -55,15 +62,9 @@ class CandleSticksChart extends HTMLElement {
         if (event) {
             this.#lastMousePosition = {offsetX: event.offsetX, offsetY: event.offsetY};
         }
-        
-        const textX = this.#canvas.width - 40;
 
-        const priceRange = 4;
-        const highestPrice = 154 + priceRange;
-        const lowestPrice = 152 - priceRange;
-        const fraction = (highestPrice - lowestPrice) / this.#horizontalLines;
-        const price = parseFloat(highestPrice - (event.offsetY * fraction) / (this.#canvas.height / this.#horizontalLines)).toFixed(2);
-        
+        const textX = this.#canvas.width - 40;
+        const price = parseFloat(this.#highestPrice - (event.offsetY * this.#priceFraction) / (this.#canvas.height / this.#horizontalLines)).toFixed(2);
         this.#context.strokeStyle = '#aab';
         this.#context.lineWidth = .8;
         this.#context.setLineDash([4, 4]);
@@ -93,20 +94,12 @@ class CandleSticksChart extends HTMLElement {
     draw() {
         this.#context.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
 
-        const center = Math.floor(this.#canvas.height / 2);
-        const maxCandles = Math.floor((this.#canvas.width - this.#priceLabelWidth) / (CandleStick.width() + 10));
-
-        const priceRange = 4;
-        const highestPrice = 154 + priceRange;
-        const lowestPrice = 152 - priceRange;
-        const fraction = (highestPrice - lowestPrice) / this.#horizontalLines;
-
         this.#context.lineWidth = 1;
         this.#context.font = '14px sans-serif';
         this.#context.textAlign = 'center';
 
         for (let i = 0; i <= this.#horizontalLines; i++) {
-            const posY = (this.#canvas.height / this.#horizontalLines) * i;
+            const posY = this.#canvas.height / this.#horizontalLines * i;
             this.#context.beginPath();
             this.#context.fillStyle = '#1f1f27';
             this.#context.strokeStyle = '#1f1f27';
@@ -115,7 +108,7 @@ class CandleSticksChart extends HTMLElement {
             this.#context.lineTo(this.#canvas.width - this.#priceLabelWidth, posY);
             this.#context.stroke();
             this.#context.fillStyle = '#aab';
-            this.#context.fillText(parseFloat(fraction * i - highestPrice).toFixed(2), this.#canvas.width - 40, posY);
+            this.#context.fillText(parseFloat(i * this.#priceFraction - this.#highestPrice).toFixed(2), this.#canvas.width - 40, posY);
         }
 
         for (let i = 0; i < Math.ceil(this.#canvas.width / 40); i++) {
@@ -124,13 +117,9 @@ class CandleSticksChart extends HTMLElement {
             this.#context.fillRect(Math.max(i, 1) * 38, 0, 1, this.#canvas.height);
         }
 
-        const data = this.#data.length > maxCandles
-            ? [...this.#data].slice(-Math.abs(maxCandles))
-            : this.#data;
+        const highestVolume = Math.max(...this.#data.flatMap(c => c.volume));
 
-        const highestVolume = Math.max(...data.flatMap(c => c.volume));
-
-        data.forEach((json, index) => {
+        this.#data.forEach((json, index) => {
             const candle = new CandleStick(
                 json.open,
                 json.close,
@@ -142,18 +131,24 @@ class CandleSticksChart extends HTMLElement {
             this.#context.fillStyle = candle.isBear() ? '#bd4343' : '#508850';
             this.#context.strokeStyle = this.#context.fillStyle;
 
+            const candlePosY = (this.#canvas.height / this.#horizontalLines) * ((this.#highestPrice - Math.max(candle.open, candle.close)) / this.#priceFraction);
+            const candleHeight  = (this.#canvas.height / this.#horizontalLines) * ((this.#highestPrice - Math.min(candle.open, candle.close)) / this.#priceFraction) - candlePosY;
+
             this.#context.fillRect(
                 index * (CandleStick.width() + 10),
-                center - Math.max(candle.open, candle.close),
+                candlePosY,
                 CandleStick.width(),
-                candle.height()
+                candleHeight
             );
+
+            const candleHighPosY = (this.#canvas.height / this.#horizontalLines) * ((this.#highestPrice - candle.high) / this.#priceFraction);
+            const candleHighHeight = (this.#canvas.height / this.#horizontalLines) * ((this.#highestPrice - candle.low) / this.#priceFraction) - candleHighPosY;
 
             this.#context.fillRect(
                 Math.floor((CandleStick.width() + 10) * index + CandleStick.width() / 2),
-                center - Math.max(candle.high, candle.low),
+                candleHighPosY,
                 candle.highLowWidth(),
-                candle.highLowHeight()
+                candleHighHeight
             );
 
             this.#context.globalAlpha = .4;
@@ -169,21 +164,22 @@ class CandleSticksChart extends HTMLElement {
 
             this.#context.globalAlpha = 1;
 
-            if (data.length === (index + 1)) {
+            if (this.#data.length === (index + 1)) {
+                const posY = (this.#canvas.height / this.#horizontalLines) * ((this.#highestPrice - candle.close) / this.#priceFraction)
                 this.#context.beginPath();
                 this.#context.shadowBlur = 10;
                 this.#context.shadowColor = this.#context.fillStyle;
                 this.#context.lineWidth = 2;
                 this.#context.setLineDash([2, 2]);
-                this.#context.moveTo(0, center - candle.close);
-                this.#context.lineTo(this.#canvas.width, center - candle.close);
+                this.#context.moveTo(0, posY);
+                this.#context.lineTo(this.#canvas.width, posY);
                 this.#context.stroke();
-                this.#context.fillRect(this.#canvas.width - this.#priceLabelWidth, center - candle.close - 12, this.#priceLabelWidth, 24);
+                this.#context.fillRect(this.#canvas.width - this.#priceLabelWidth, posY - 12, this.#priceLabelWidth, 24);
                 this.#context.fillStyle = '#fff';
                 this.#context.fillText(
-                    Math.ceil(candle.close),
+                    parseFloat(candle.close).toFixed(2),
                     this.#canvas.width - 40,
-                    center - candle.close + 4
+                    posY + 4
                 );
                 this.#context.shadowBlur = 0;
                 this.#context.shadowColor = '#aab';
@@ -195,7 +191,19 @@ class CandleSticksChart extends HTMLElement {
     }
 
     updateData(data) {
-        this.#data = data;
+        const maxCandles = Math.floor((this.#canvas.width - this.#priceLabelWidth) / (CandleStick.width() + 10));
+
+        this.#data = data.length > maxCandles
+            ? [...data].slice(-Math.abs(maxCandles))
+            : data;
+
+        const priceRange = 4;
+        const dataFlat = this.#data.flatMap(c => c.close);
+
+        this.#highestPrice = Math.max(...dataFlat) + priceRange;
+        this.#lowestPrice = Math.min(...dataFlat) - priceRange;
+        this.#priceFraction = (this.#highestPrice - this.#lowestPrice) / this.#horizontalLines;
+
         this.draw();
     }
 }

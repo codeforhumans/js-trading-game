@@ -17,7 +17,7 @@ class CandleStick {
     }
 
     static width() {
-        return 5;
+        return 8;
     }
 
     get open() {
