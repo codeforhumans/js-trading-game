@@ -19,14 +19,12 @@ class OrderTransaction extends HTMLElement {
             :host {
                 align-items: center;
                 display: flex;
-                column-gap: 2em;
-                justify-content: space-evenly;
-                padding: 2em 1em;
+                column-gap: 1em;
+                padding: 1em;
             }
             :host span {
-                background-color: #0b0b0e;
+                background-color: #000;
                 border: 4px solid #1f1f27;
-                border-radius: 1em;
                 color: #556;
                 display: inline-block;
                 flex: none;
@@ -38,7 +36,6 @@ class OrderTransaction extends HTMLElement {
             :host .btn {
                 border-width: 1px;
                 border-style: solid;
-                border-radius: 1em;
                 color: white;
                 cursor: pointer;
                 font-size: 1em;
@@ -67,7 +64,6 @@ class OrderTransaction extends HTMLElement {
             :host .btn.sell:hover {
                 background-color: #eb3a3a;
                 border-color: #ff746f;
-            
             }
             :host .btn.buy:disabled, :host .btn.buy:disabled:hover,
             :host .btn.sell:disabled, :host .btn.sell:disabled:hover {

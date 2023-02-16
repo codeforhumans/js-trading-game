@@ -23,11 +23,6 @@ class CandleSticksChart extends HTMLElement {
             <style>
             :host {
                 cursor: crosshair;
-                display: block;
-                min-height: 600px; // make this dynamic
-            }
-            :host canvas {
-                display: block;
             }
             </style>
             <slot>

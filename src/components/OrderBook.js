@@ -16,9 +16,7 @@ class OrderBook extends HTMLElement {
                 background-color: #131318;
                 color: #eee;
                 font-size: .8em;
-                height: 150px;
                 bottom: 200px;
-                overflow-y: scroll;
                 padding: 1em;
             }
             :host table {

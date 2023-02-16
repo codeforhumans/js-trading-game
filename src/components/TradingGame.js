@@ -15,11 +15,29 @@ class TradingGame extends HTMLElement {
 
         shadow.innerHTML = `
             <style>
+            :host {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                min-height: 100%;
+            }
+            :host candlesticks-chart, :host footer {
+                display: flex;
+                flex-direction: column;
+            }
+            :host candlesticks-chart {
+                flex: 1;
+            }
+            :host footer {
+                height: 300px;
+            }
             </style>
             <slot>
                 <candlesticks-chart></candlesticks-chart>
-                <order-transaction></order-transaction>
-                <order-book></order-book>
+                <footer>
+                    <order-transaction></order-transaction>
+                    <order-book></order-book>
+                </footer>
             </slot>
         `;
 
