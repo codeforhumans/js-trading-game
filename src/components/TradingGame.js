@@ -96,7 +96,7 @@ class TradingGame extends HTMLElement {
         this.#transaction.addEventListener('orderSold', event => this.showProfit(event.detail) || this.updateBook(event.detail));
 
         // convert to event?
-        setInterval(this.updateData, 30000);
+        setInterval(this.updateData, 10000);
 
         this.updateData();
     }
@@ -110,15 +110,16 @@ class TradingGame extends HTMLElement {
     }
 
     showProfit(order) {
-        const profit = order.buyPrice - order.sellPrice;
+        const profit = order.sellPrice - order.buyPrice;
         const usdFormatter = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
         const profitResultElement = this.shadowRoot.getElementById('profit-result');
 
+        profitResultElement.classList.remove('positive', 'negative');
         profitResultElement.classList.add(profit > 0 ? 'positive' : 'negative');
         profitResultElement.classList.remove('hidden');
         this.shadowRoot.querySelector('#profit-result strong').innerText = usdFormatter.format(profit);
 
-        setInterval(() => profitResultElement.classList.add('hidden'), 6000);
+        setInterval(() => profitResultElement.classList.add('hidden'), 10000);
     }
 
     updateBook(order) {

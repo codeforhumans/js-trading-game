@@ -186,6 +186,8 @@ class CandleSticksChart extends HTMLElement {
     }
 
     updateData(data) {
+        data = data.filter(c => c.volume > 0);
+
         const maxCandles = Math.floor((this.#canvas.width - this.#priceLabelWidth) / (CandleStick.width() + 10));
 
         this.#data = data.length > maxCandles
