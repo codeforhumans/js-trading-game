@@ -192,7 +192,7 @@ class CandleSticksChart extends HTMLElement {
             ? [...data].slice(-Math.abs(maxCandles))
             : data;
 
-        const priceRange = 4;
+        const priceRange = 1;
         const dataFlat = this.#data.flatMap(c => c.close);
 
         this.#highestPrice = Math.max(...dataFlat) + priceRange;

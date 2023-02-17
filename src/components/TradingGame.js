@@ -96,7 +96,7 @@ class TradingGame extends HTMLElement {
         this.#transaction.addEventListener('orderSold', event => this.showProfit(event.detail) || this.updateBook(event.detail));
 
         // convert to event?
-        setInterval(this.updateData, 1000);
+        setInterval(this.updateData, 30000);
 
         this.updateData();
     }
