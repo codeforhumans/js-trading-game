@@ -1,5 +1,9 @@
 import yfinance as yf
+import time
 
-msft = yf.Ticker('AAPL')
-hist = msft.history(period='max', interval='1d')
-hist.rename(str.lower, axis='columns').to_json('data.json', orient='records')
+while True:
+    msft = yf.Ticker('AAPL')
+    hist = msft.history(period='60m', interval='1m')
+    hist.rename(str.lower, axis='columns').to_json('data.json', orient='records')
+    print("data collected")
+    time.sleep(60)
